@@ -3,12 +3,12 @@
 #include <cppad/ipopt/solve.hpp>
 #include "Eigen-3.3/Eigen/Core"
 #include "Eigen-3.3/Eigen/QR"
-
+#include <limits>
 using CppAD::AD;
 
 // Set the timestep length and duration
 // Currently tuned to predict 1 second worth
-size_t N = 10;
+size_t N = 15;
 double dt = 0.1;
 
 // This value assumes the model presented in the classroom is used.
@@ -24,7 +24,7 @@ double dt = 0.1;
 const double Lf = 2.67;
 
 // Set desired speed for the cost function (i.e. max speed)
-const double ref_v = 120;
+const double ref_v = 100;
 
 // The solver takes all the state variables and actuator
 // variables in a singular vector. Thus, we should to establish
@@ -62,8 +62,8 @@ class FG_eval {
     const int v_cost_weight = 1;
     const int delta_cost_weight = 10;
     const int a_cost_weight = 10;
-    const int delta_change_cost_weight = 100;
-    const int a_change_cost_weight = 10;
+    const int delta_change_cost_weight = 150;
+    const int a_change_cost_weight = 15;
 
     // Cost for CTE, psi error and velocity
     for (int t = 0; t < N; t++) {
@@ -169,15 +169,15 @@ vector<double> MPC::Solve(Eigen::VectorXd state, Eigen::VectorXd coeffs) {
   // Set all non-actuators upper and lowerlimits
   // to the max negative and positive values.
   for (int i = 0; i < delta_start; i++) {
-    vars_lowerbound[i] = -1.0e19;
-    vars_upperbound[i] = 1.0e19;
+    vars_lowerbound[i] = std::numeric_limits<int>::min();
+    vars_upperbound[i] = std::numeric_limits<int>::max();
   }
 
   // The upper and lower limits of delta are set to -25 and 25
   // degrees (values in radians).
   for (int i = delta_start; i < a_start; i++) {
-    vars_lowerbound[i] = -0.436332;
-    vars_upperbound[i] = 0.436332;
+    vars_lowerbound[i] = -0.523599;
+    vars_upperbound[i] = 0.523599;
   }
 
   // Acceleration/decceleration upper and lower limits.
